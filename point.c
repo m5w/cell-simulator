@@ -49,7 +49,7 @@ struct InterpolatedVoltage interpolate_voltage_points_iterator(
     }
 
     const BatteryDischargeCurvePoint *const next_points_iterator =
-        points_iterator + sizeof(BatteryDischargeCurvePoint);
+        points_iterator + 1;
 
     if (next_points_iterator >= points_end) {
       error = EXTRAPOLATION_ABOVE;

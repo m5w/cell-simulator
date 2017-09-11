@@ -1,10 +1,12 @@
 #ifndef GTSR_BATTERY_SIMULATOR_ERROR_H
 #define GTSR_BATTERY_SIMULATOR_ERROR_H
 
-enum {
+enum ErrorType {
   NONE,
   EXTRAPOLATION_BELOW,
   EXTRAPOLATION_ABOVE
-} error;
+};
+
+extern enum ErrorType error;
 
 #endif

@@ -15,19 +15,45 @@ struct BatteryDischargeCurvePoint {
 
 typedef struct BatteryDischargeCurvePoint BatteryDischargeCurvePoint;
 
+#ifdef __cplusplus
+
+extern "C" {
+
+#endif
+
 FloatingPointType interpolate_voltage(const BatteryDischargeCurvePoint *points,
                                       const size_t number_of_points,
                                       const FloatingPointType charge);
+
+#ifdef __cplusplus
+
+}
+
+#endif
 
 struct InterpolatedVoltage {
   FloatingPointType interpolated_voltage;
   const BatteryDischargeCurvePoint *points_iterator;
   BatteryDischargeCurvePoint point;
   FloatingPointType point_charge;
-} interpolate_voltage_points_iterator(
+};
+
+#ifdef __cplusplus
+
+extern "C" {
+
+#endif
+
+struct InterpolatedVoltage interpolate_voltage_points_iterator(
     const BatteryDischargeCurvePoint *points_iterator,
     BatteryDischargeCurvePoint point, FloatingPointType point_charge,
     const BatteryDischargeCurvePoint *const points_end,
     const FloatingPointType charge);
+
+#ifdef __cplusplus
+
+}
+
+#endif
 
 #endif
