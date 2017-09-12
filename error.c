@@ -1,3 +1,3 @@
 #include "error.h"
 
-enum ErrorType error;
+enum ErrorType error = NONE;

@@ -1,10 +1,8 @@
+*.a
 *.swp
 
-/CMakeCache.txt
-/CMakeFiles/
-/Makefile
-/cmake_install.cmake
-*.a
+CMakeFiles/
+Makefile
+cmake_install.cmake
 
-/rand
-/testpoint
+/CMakeCache.txt
