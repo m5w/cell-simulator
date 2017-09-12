@@ -14,6 +14,14 @@ struct CellDischargeCurvePoint {
 
 typedef struct CellDischargeCurvePoint CellDischargeCurvePoint;
 
+const union {
+  const CellDischargeCurvePoint cell_discharge_curve_point;
+  const unsigned char s[sizeof(CellDischargeCurvePoint)];
+} union_cell_discharge_curve_point = {.s = {0}};
+
+#define ERROR_CELL_DISCHARGE_CURVE_POINT                                       \
+  union_cell_discharge_curve_point.cell_discharge_curve_point;
+
 #ifdef __cplusplus
 }
 #endif
