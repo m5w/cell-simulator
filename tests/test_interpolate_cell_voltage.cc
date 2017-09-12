@@ -15,30 +15,54 @@ BOOST_AUTO_TEST_CASE(test_interpolate_cell_voltage) {
   FloatingPointType voltage;
 
   BOOST_CHECK(error == NONE);
-  voltage = interpolate_cell_voltage(points, number_of_points, -0.5);
+
+  voltage = interpolate_cell_voltage(points, number_of_points, -2);
   BOOST_CHECK(error == EXTRAPOLATION_BELOW);
   error = NONE;
 
-  voltage = interpolate_cell_voltage(points, number_of_points, 0);
-  BOOST_CHECK(error == NONE);
-  BOOST_CHECK(voltage == 1);
+  voltage = interpolate_cell_voltage(points, number_of_points, -1);
+  BOOST_CHECK(error == EXTRAPOLATION_BELOW);
+  error = NONE;
+
+  for (std::size_t x = 0; x < 2; ++x) {
+    voltage = interpolate_cell_voltage(points, number_of_points, 0);
+    BOOST_CHECK(error == NONE);
+    BOOST_CHECK(voltage == 1);
+  }
 
   voltage = interpolate_cell_voltage(points, number_of_points, 0.5);
   BOOST_CHECK(error == NONE);
   BOOST_CHECK(voltage == 1.5);
 
-  voltage = interpolate_cell_voltage(points, number_of_points, 1);
+  voltage = interpolate_cell_voltage(points, number_of_points, 0.75);
   BOOST_CHECK(error == NONE);
-  BOOST_CHECK(voltage == 2);
+  BOOST_CHECK(voltage == 1.75);
+
+  for (std::size_t x = 0; x < 2; ++x) {
+    voltage = interpolate_cell_voltage(points, number_of_points, 1);
+    BOOST_CHECK(error == NONE);
+    BOOST_CHECK(voltage == 2);
+  }
 
   voltage = interpolate_cell_voltage(points, number_of_points, 1.5);
   BOOST_CHECK(error == NONE);
   BOOST_CHECK(voltage == 3);
 
-  voltage = interpolate_cell_voltage(points, number_of_points, 2);
+  voltage = interpolate_cell_voltage(points, number_of_points, 1.75);
   BOOST_CHECK(error == NONE);
-  BOOST_CHECK(voltage == 4);
+  BOOST_CHECK(voltage == 3.5);
 
-  voltage = interpolate_cell_voltage(points, number_of_points, 2.5);
+  for (std::size_t x = 0; x < 2; ++x) {
+    voltage = interpolate_cell_voltage(points, number_of_points, 2);
+    BOOST_CHECK(error == NONE);
+    BOOST_CHECK(voltage == 4);
+  }
+
+  voltage = interpolate_cell_voltage(points, number_of_points, 3);
   BOOST_CHECK(error == EXTRAPOLATION_ABOVE);
+  error = NONE;
+
+  voltage = interpolate_cell_voltage(points, number_of_points, 4);
+  BOOST_CHECK(error == EXTRAPOLATION_ABOVE);
+  error = NONE;
 }

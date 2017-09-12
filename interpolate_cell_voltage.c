@@ -61,16 +61,6 @@ interpolate_cell_voltage(const CellDischargeCurvePoint *const points,
       case CMP_NEXT_POINT_CHARGE:
         if (charge < next_point_charge)
           return interpolate(point_charge, point_voltage, slope, charge);
-
-        point_charge = next_point_charge;
-        points_iterator = next_points_iterator;
-
-        if (charge == point_charge) {
-          state = CMP_POINT_CHARGE;
-          return point_voltage;
-        }
-
-        continue;
       }
 
       point_charge = next_point_charge;
