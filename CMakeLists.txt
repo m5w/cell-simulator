@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.1)
 project (BatterySimulator)
+set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
 find_package (Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories (${Boost_INCLUDE_DIRS})
 include_directories (${PROJECT_SOURCE_DIR})

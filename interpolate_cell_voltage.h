@@ -11,15 +11,29 @@
 extern "C" {
 #endif
 
-FloatingPointType
-interpolate_cell_voltage(const CellDischargeCurvePoint *const points,
-                         const size_t number_of_points,
-                         const FloatingPointType charge);
+typedef struct LerpCellVoltageStateType {
+  enum { LERP_CELL_VOLTAGE, CMP_POINT_CHARGE, CMP_NEXT_POINT_CHARGE } state;
+  const CellDischargeCurvePoint *const points_end;
+  const CellDischargeCurvePoint *points_iterator;
+  FloatingPointType point_charge;
+  const CellDischargeCurvePoint *next_points_iterator;
+  FloatingPointType next_point_charge;
+  FloatingPointType point_voltage;
+  FloatingPointType m;
+} LerpCellVoltageStateType;
 
-static inline FloatingPointType interpolate(const FloatingPointType x_0,
-                                            const FloatingPointType v_0,
-                                            const FloatingPointType slope,
-                                            const FloatingPointType x_q);
+LerpCellVoltageStateType
+lerp_cell_voltage_state_type(const CellDischargeCurvePoint *const points,
+                             const size_t number_of_points);
+
+FloatingPointType
+lerp_cell_voltage(LerpCellVoltageStateType *const state_pointer,
+                  const FloatingPointType charge);
+
+static FloatingPointType lerp(const FloatingPointType x_1,
+                              const FloatingPointType y_1,
+                              const FloatingPointType m,
+                              const FloatingPointType x);
 
 #ifdef __cplusplus
 }

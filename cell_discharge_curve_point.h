@@ -7,12 +7,10 @@
 extern "C" {
 #endif
 
-struct CellDischargeCurvePoint {
+typedef struct CellDischargeCurvePoint {
   FloatingPointType charge_discharged_from_cell;
   FloatingPointType cell_voltage;
-};
-
-typedef struct CellDischargeCurvePoint CellDischargeCurvePoint;
+} CellDischargeCurvePoint;
 
 const union {
   const CellDischargeCurvePoint cell_discharge_curve_point;

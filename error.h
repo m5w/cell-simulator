@@ -5,14 +5,14 @@
 extern "C" {
 #endif
 
-enum ErrorType {
+typedef enum ErrorType {
   NONE,
   EXTRAPOLATION,
   EXTRAPOLATION_BELOW,
   EXTRAPOLATION_ABOVE
-};
+} ErrorType;
 
-extern enum ErrorType error;
+extern ErrorType error;
 
 #ifdef __cplusplus
 }
