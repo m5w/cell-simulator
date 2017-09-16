@@ -116,7 +116,8 @@ lerp_cell_voltage_linear_forward(LerpCellVoltageType *const state_pointer,
   }
 }
 
-FloatingPointType lerp(const FloatingPointType x_1, const FloatingPointType y_1,
-                       const FloatingPointType m, const FloatingPointType x) {
+FloatingPointType lerp(const FloatingPointType x_1,
+                       const FloatingPointType y_1, const FloatingPointType m,
+                       const FloatingPointType x) {
   return y_1 + (x - x_1) * m;
 }
