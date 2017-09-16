@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(test_interpolate_cell_voltage) {
       sizeof(points) / sizeof(CellDischargeCurvePoint);
   FloatingPointType voltage;
 
-  LerpCellVoltageStateType lerp_cell_voltage_state =
+  LerpCellVoltageType lerp_cell_voltage_state =
       lerp_cell_voltage_state_type(points, number_of_points);
   BOOST_CHECK(error == NONE);
 

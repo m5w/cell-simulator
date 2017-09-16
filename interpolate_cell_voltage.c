@@ -1,9 +1,9 @@
 #include "interpolate_cell_voltage.h"
 
-LerpCellVoltageStateType
+LerpCellVoltageType
 lerp_cell_voltage_state_type(const CellDischargeCurvePoint *const points,
                              const size_t number_of_points) {
-  const LerpCellVoltageStateType lerp_cell_voltage_state = {
+  const LerpCellVoltageType lerp_cell_voltage_state = {
       .state = LERP_CELL_VOLTAGE,
       .points_end = points + number_of_points,
       .points_iterator = points};
@@ -11,7 +11,7 @@ lerp_cell_voltage_state_type(const CellDischargeCurvePoint *const points,
 }
 
 FloatingPointType
-lerp_cell_voltage_linear_forward(LerpCellVoltageStateType *const state_pointer,
+lerp_cell_voltage_linear_forward(LerpCellVoltageType *const state_pointer,
                                  const FloatingPointType charge) {
   switch (state_pointer->state) {
   case LERP_CELL_VOLTAGE:
@@ -43,6 +43,9 @@ lerp_cell_voltage_linear_forward(LerpCellVoltageStateType *const state_pointer,
  * given charge is less than the next charge, execute the following block.
  *
  * Note that, indeed, a block must follow this macro.
+ *
+ * This cannot be defined as an inline function because it may or may not
+ * return.
  */
 #define CMP_NEXT_CHARGE_B                                                      \
   state_pointer->next_points_iterator = state_pointer->points_iterator + 1;    \
@@ -59,25 +62,10 @@ lerp_cell_voltage_linear_forward(LerpCellVoltageStateType *const state_pointer,
 
       CMP_NEXT_CHARGE_B {
 
-/* Linear intERPolation
- *
- * Assuming that the voltage is set, set the slope and linearly interpolate the
- * voltage between the point and the next point at the given charge.  Set the
- * coroutine to re-enter at CMP_NEXT_CHARGE.
- */
-#define LERP                                                                   \
-  state_pointer->m =                                                           \
-      (state_pointer->next_points_iterator->cell_voltage -                     \
-       state_pointer->point_voltage) /                                         \
-      (state_pointer->next_point_charge - state_pointer->point_charge);        \
-  state_pointer->state = CMP_NEXT_CHARGE;                                      \
-  return lerp(state_pointer->point_charge, state_pointer->point_voltage,       \
-              state_pointer->m, charge)
-
         /* The voltage was set when the given charge equalled the point's
          * charge.
          */
-        LERP;
+        return lerp_cell_voltage_lerp(state_pointer, charge);
       }
 
 /* CoMPare the given charge to the NEXT CHARGE: Equal
@@ -86,6 +74,9 @@ lerp_cell_voltage_linear_forward(LerpCellVoltageStateType *const state_pointer,
  * the given charge is equal to the next charge (which is also now the charge),
  * then get and return the voltage and set the coroutine to re-enter at
  * CMP_CHARGE.
+ *
+ * Like CMP_NEXT_CHARGE_B, this cannot be inlined because it may or may not
+ * return.
  */
 #define CMP_NEXT_CHARGE_E                                                      \
   state_pointer->point_charge = state_pointer->next_point_charge;              \
@@ -108,7 +99,7 @@ lerp_cell_voltage_linear_forward(LerpCellVoltageStateType *const state_pointer,
 
         state_pointer->point_voltage =
             state_pointer->points_iterator->cell_voltage;
-        LERP;
+        return lerp_cell_voltage_lerp(state_pointer, charge);
 
 #undef LERP
 
@@ -125,9 +116,7 @@ lerp_cell_voltage_linear_forward(LerpCellVoltageStateType *const state_pointer,
   }
 }
 
-static FloatingPointType lerp(const FloatingPointType x_1,
-                              const FloatingPointType y_1,
-                              const FloatingPointType m,
-                              const FloatingPointType x) {
+FloatingPointType lerp(const FloatingPointType x_1, const FloatingPointType y_1,
+                       const FloatingPointType m, const FloatingPointType x) {
   return y_1 + (x - x_1) * m;
 }
