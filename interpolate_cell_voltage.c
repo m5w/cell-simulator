@@ -11,8 +11,8 @@ lerp_cell_voltage_state_type(const CellDischargeCurvePoint *const points,
 }
 
 FloatingPointType
-lerp_cell_voltage(LerpCellVoltageStateType *const state_pointer,
-                  const FloatingPointType charge) {
+lerp_cell_voltage_linear_forward(LerpCellVoltageStateType *const state_pointer,
+                                 const FloatingPointType charge) {
   switch (state_pointer->state) {
   case LERP_CELL_VOLTAGE:
     if (state_pointer->points_iterator >= state_pointer->points_end) {
@@ -31,13 +31,20 @@ lerp_cell_voltage(LerpCellVoltageStateType *const state_pointer,
     if (charge == state_pointer->point_charge) {
       state_pointer->point_voltage =
           state_pointer->points_iterator->cell_voltage;
-      state_pointer->state = CMP_POINT_CHARGE;
+      state_pointer->state = CMP_CHARGE;
       return state_pointer->point_voltage;
-    case CMP_POINT_CHARGE:
+    case CMP_CHARGE:
       if (charge == state_pointer->point_charge)
         return state_pointer->point_voltage;
 
-#define FOR_BEGIN                                                              \
+/* CoMPare the given charge to the NEXT CHARGE: Below
+ *
+ * Get and bounds-check the next iterator, get the next charge, and, if the
+ * given charge is less than the next charge, execute the following block.
+ *
+ * Note that, indeed, a block must follow this macro.
+ */
+#define CMP_NEXT_CHARGE_B                                                      \
   state_pointer->next_points_iterator = state_pointer->points_iterator + 1;    \
                                                                                \
   if (state_pointer->next_points_iterator >= state_pointer->points_end) {      \
@@ -48,65 +55,72 @@ lerp_cell_voltage(LerpCellVoltageStateType *const state_pointer,
   state_pointer->next_point_charge =                                           \
       state_pointer->next_points_iterator->charge_discharged_from_cell;        \
                                                                                \
-  if (charge < state_pointer->next_point_charge) {
+  if (charge < state_pointer->next_point_charge)
 
-      FOR_BEGIN
+      CMP_NEXT_CHARGE_B {
 
-/* _L_inear int_ERP_olation
+/* Linear intERPolation
  *
  * Assuming that the voltage is set, set the slope and linearly interpolate the
  * voltage between the point and the next point at the given charge.  Set the
- * coroutine to re-enter at CMP_NEXT_POINT_CHARGE.
+ * coroutine to re-enter at CMP_NEXT_CHARGE.
  */
 #define LERP                                                                   \
   state_pointer->m =                                                           \
       (state_pointer->next_points_iterator->cell_voltage -                     \
        state_pointer->point_voltage) /                                         \
       (state_pointer->next_point_charge - state_pointer->point_charge);        \
-  state_pointer->state = CMP_NEXT_POINT_CHARGE;                                \
+  state_pointer->state = CMP_NEXT_CHARGE;                                      \
   return lerp(state_pointer->point_charge, state_pointer->point_voltage,       \
-              state_pointer->m, charge);
+              state_pointer->m, charge)
 
-      /* The voltage was set when the given charge equalled the point's charge.
-       * Using these macros allows the computer to skip repeating the
-       * assignment.
-       */
-      LERP
+        /* The voltage was set when the given charge equalled the point's
+         * charge.
+         */
+        LERP;
+      }
 
-#define FOR_END                                                                \
-  }                                                                            \
-                                                                               \
+/* CoMPare the given charge to the NEXT CHARGE: Equal
+ *
+ * Set the iterator to the next iterator and the charge to the next charge.  If
+ * the given charge is equal to the next charge (which is also now the charge),
+ * then get and return the voltage and set the coroutine to re-enter at
+ * CMP_CHARGE.
+ */
+#define CMP_NEXT_CHARGE_E                                                      \
   state_pointer->point_charge = state_pointer->next_point_charge;              \
   state_pointer->points_iterator = state_pointer->next_points_iterator;        \
                                                                                \
   if (charge == state_pointer->point_charge) {                                 \
     state_pointer->point_voltage =                                             \
         state_pointer->points_iterator->cell_voltage;                          \
-    state_pointer->state = CMP_POINT_CHARGE;                                   \
+    state_pointer->state = CMP_CHARGE;                                         \
     return state_pointer->point_voltage;                                       \
   }
 
-          FOR_END
+      CMP_NEXT_CHARGE_E
     }
 
     for (;;) {
-      FOR_BEGIN
+      CMP_NEXT_CHARGE_B {
 
-#undef FOR_BEGIN
+#undef CMP_NEXT_CHARGE_B
 
-      state_pointer->point_voltage =
-          state_pointer->points_iterator->cell_voltage;
-      LERP
+        state_pointer->point_voltage =
+            state_pointer->points_iterator->cell_voltage;
+        LERP;
 
 #undef LERP
 
-          case CMP_NEXT_POINT_CHARGE
-          : if (charge < state_pointer->next_point_charge) return lerp(
-                state_pointer->point_charge, state_pointer->point_voltage,
-                state_pointer->m, charge);
-      FOR_END
+      case CMP_NEXT_CHARGE:
+        if (charge < state_pointer->next_point_charge)
+          return lerp(state_pointer->point_charge, state_pointer->point_voltage,
+                      state_pointer->m, charge);
+      }
 
-#undef FOR_END
+      CMP_NEXT_CHARGE_E
+
+#undef CMP_NEXT_CHARGE_E
     }
   }
 }

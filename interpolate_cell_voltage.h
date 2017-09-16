@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 typedef struct LerpCellVoltageStateType {
-  enum { LERP_CELL_VOLTAGE, CMP_POINT_CHARGE, CMP_NEXT_POINT_CHARGE } state;
+  enum { LERP_CELL_VOLTAGE, CMP_CHARGE, CMP_NEXT_CHARGE } state;
   const CellDischargeCurvePoint *const points_end;
   const CellDischargeCurvePoint *points_iterator;
   FloatingPointType point_charge;
@@ -26,14 +26,24 @@ LerpCellVoltageStateType
 lerp_cell_voltage_state_type(const CellDischargeCurvePoint *const points,
                              const size_t number_of_points);
 
-FloatingPointType
+inline FloatingPointType
 lerp_cell_voltage(LerpCellVoltageStateType *const state_pointer,
                   const FloatingPointType charge);
+
+FloatingPointType
+lerp_cell_voltage_linear_forward(LerpCellVoltageStateType *const state_pointer,
+                                 const FloatingPointType charge);
 
 static FloatingPointType lerp(const FloatingPointType x_1,
                               const FloatingPointType y_1,
                               const FloatingPointType m,
                               const FloatingPointType x);
+
+inline FloatingPointType
+lerp_cell_voltage(LerpCellVoltageStateType *const state_pointer,
+                  const FloatingPointType charge) {
+  return lerp_cell_voltage_linear_forward(state_pointer, charge);
+}
 
 #ifdef __cplusplus
 }
