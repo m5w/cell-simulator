@@ -1,14 +1,14 @@
 #include <cstddef>
 
-#define BOOST_TEST_MODULE test_interpolate_cell_voltage
+#define BOOST_TEST_MODULE test_lerp_cell_voltage
 #include <boost/test/included/unit_test.hpp>
 
 #include "cell_discharge_curve_point.h"
 #include "error.h"
 #include "floating_point_type.h"
-#include "interpolate_cell_voltage.h"
+#include "lerp_cell_voltage.h"
 
-BOOST_AUTO_TEST_CASE(test_interpolate_cell_voltage) {
+BOOST_AUTO_TEST_CASE(test_lerp_cell_voltage) {
   BOOST_CHECK(error == NONE);
 
   const CellDischargeCurvePoint points[] = {{0, 1}, {1, 2}, {2, 4}};

@@ -1,5 +1,5 @@
-#ifndef INTERPOLATE_CELL_VOLTAGE_H
-#define INTERPOLATE_CELL_VOLTAGE_H
+#ifndef LERP_CELL_VOLTAGE_H
+#define LERP_CELL_VOLTAGE_H
 
 #include <stddef.h>
 

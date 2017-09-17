@@ -8,6 +8,6 @@ set (CMAKE_C_STANDARD 11)
 set (CMAKE_CXX_STANDARD 14)
 add_library (cell
         error.c
-        interpolate_cell_voltage.c
+        lerp_cell_voltage.c
         )
 add_subdirectory (tests)

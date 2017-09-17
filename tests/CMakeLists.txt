@@ -1,2 +1,2 @@
-add_executable (test-interpolate-cell-voltage test_interpolate_cell_voltage.cc)
-target_link_libraries (test-interpolate-cell-voltage ${Boost_LIBRARIES} cell)
+add_executable (test-lerp-cell-voltage test_lerp_cell_voltage.cc)
+target_link_libraries (test-lerp-cell-voltage ${Boost_LIBRARIES} cell)

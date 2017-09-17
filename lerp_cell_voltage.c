@@ -1,4 +1,4 @@
-#include "interpolate_cell_voltage.h"
+#include "lerp_cell_voltage.h"
 
 LerpCellVoltageType
 lerp_cell_voltage_state_type(const CellDischargeCurvePoint *const points,
