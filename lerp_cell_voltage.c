@@ -143,15 +143,60 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
 
 #define LERP                                                                  \
   point_voltage = points_iterator->cell_voltage;                              \
-                                                                              \
-  /* It is safe to increment and then dereference the iterator because it was \
-   * decremented at least once.                                               \
-   */                                                                         \
-  next_points_iterator = points_iterator + 1;                                 \
-  next_point_charge = next_points_iterator->charge_discharged_from_cell;      \
   m = lerp_cell_voltage_get_m(point_charge, next_points_iterator,             \
                               next_point_charge, point_voltage);              \
   buf_pointer->state = LINEAR_M_CMP_CHARGE;                                   \
+  buf_pointer->points_iterator = points_iterator;                             \
+  buf_pointer->point_charge = point_charge;                                   \
+  buf_pointer->next_points_iterator = next_points_iterator;                   \
+  buf_pointer->next_point_charge = next_point_charge;                         \
+  buf_pointer->point_voltage = point_voltage;                                 \
+  buf_pointer->m = m;                                                         \
+  return lerp(point_charge, point_voltage, m, charge)
+
+#define CMP_NEXT_ITERATOR_AE                                                  \
+  if (next_points_iterator >= points_end) {                                   \
+    error = EXTRAPOLATION_ABOVE;                                              \
+    return ERROR_FLOATING_POINT_TYPE;                                         \
+  } //
+
+#define VOLTAGE_LERP                                                          \
+  m = lerp_cell_voltage_get_m(point_charge, next_points_iterator,             \
+                              next_point_charge, point_voltage);              \
+  buf_pointer->state = LINEAR_M_CMP_CHARGE;                                   \
+  buf_pointer->next_points_iterator = next_points_iterator;                   \
+  buf_pointer->next_point_charge = next_point_charge;                         \
+  buf_pointer->m = m;                                                         \
+  return lerp(point_charge, point_voltage, m, charge)
+
+#define INC_ITERATOR                                                          \
+  point_charge = next_point_charge;                                           \
+                                                                              \
+  for (;;) {                                                                  \
+    next_points_iterator = points_iterator + 1;                               \
+                                                                              \
+    CMP_NEXT_ITERATOR_AE;                                                     \
+                                                                              \
+    next_point_charge = next_points_iterator->charge_discharged_from_cell;    \
+                                                                              \
+    if (charge < next_point_charge) {                                         \
+      LERP;                                                                   \
+    }                                                                         \
+                                                                              \
+    points_iterator = next_points_iterator;                                   \
+                                                                              \
+    if (charge == next_point_charge) {                                        \
+      RET_VOLTAGE_INC;                                                        \
+    }                                                                         \
+                                                                              \
+    point_charge = next_point_charge;                                         \
+  } //
+
+#define LERP_FIRST                                                            \
+  point_voltage = points_iterator->cell_voltage;                              \
+  m = lerp_cell_voltage_get_m(point_charge, next_points_iterator,             \
+                              next_point_charge, point_voltage);              \
+  buf_pointer->state = LINEAR_M_CMP_FIRST_CHARGE;                             \
   buf_pointer->points_iterator = points_iterator;                             \
   buf_pointer->point_charge = point_charge;                                   \
   buf_pointer->next_points_iterator = next_points_iterator;                   \
@@ -236,15 +281,88 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
                 RET_VOLTAGE_DEC;
               }
 
+              /* It is safe to increment and then dereference the iterator
+               * because it was decremented at least once.
+               */
+              next_points_iterator = points_iterator + 1;
+              next_point_charge =
+                  next_points_iterator->charge_discharged_from_cell;
+
               LERP;
             }
 
             if (charge == point_charge)
               return buf_pointer->point_voltage;
+
+            next_point_charge = buf_pointer->next_point_charge;
+
+            if (charge < next_point_charge)
+              return lerp(buf_pointer->point_charge,
+                          buf_pointer->point_voltage, buf_pointer->m, charge);
+
+            points_iterator = buf_pointer->next_points_iterator;
+
+            if (charge == next_point_charge) {
+              RET_VOLTAGE_INC;
+            }
+
+            INC_ITERATOR;
           }
+
+          if (charge == point_charge)
+            return buf_pointer->point_voltage;
+
+          points_end = buf_pointer->points_end;
+          next_points_iterator = buf_pointer->points_iterator + 1;
+
+          CMP_NEXT_ITERATOR_AE;
+
+          next_point_charge =
+              next_points_iterator->charge_discharged_from_cell;
+
+          if (charge < next_point_charge) {
+            point_voltage = buf_pointer->point_voltage;
+            VOLTAGE_LERP;
+          }
+
+          points_iterator = next_points_iterator;
+
+          if (charge == next_point_charge) {
+            RET_VOLTAGE_INC;
+          }
+
+          INC_ITERATOR;
         }
+
+        INC_ITERATOR;
       }
+
+      points_iterator = next_points_iterator;
+
+      if (charge == next_point_charge) {
+        RET_VOLTAGE_INC;
+      }
+
+      INC_ITERATOR;
     }
+
+    next_points_iterator = points_iterator + 1;
+
+    CMP_FIRST_NEXT_ITERATOR_AE;
+
+    next_point_charge = next_points_iterator->charge_discharged_from_cell;
+
+    if (charge < next_point_charge) {
+      LERP_FIRST;
+    }
+
+    points_iterator = next_points_iterator;
+
+    if (charge == next_point_charge) {
+      RET_VOLTAGE_INC;
+    }
+
+    INC_ITERATOR;
   }
 }
 
