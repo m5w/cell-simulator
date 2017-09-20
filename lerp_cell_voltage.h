@@ -82,8 +82,8 @@ static FloatingPointType lerp(const FloatingPointType x_1,
 
 FloatingPointType lerp_cell_voltage(void *const buf_pointer,
                                     const FloatingPointType charge) {
-  return lerp_cell_voltage_linear_forward(
-      (LerpCellVoltageLinearForwardBufType *)buf_pointer, charge);
+  return lerp_cell_voltage_linear((LerpCellVoltageLinearBufType *)buf_pointer,
+                                  charge);
 }
 
 #ifdef __cplusplus

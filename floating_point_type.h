@@ -14,7 +14,7 @@ const union {
   const unsigned char s[sizeof(FloatingPointType)];
 } union_floating_point_type = {.s = {0}};
 
-#define ERROR_FLOATING_POINT_TYPE union_floating_point_type.floating_point_type;
+#define ERROR_FLOATING_POINT_TYPE union_floating_point_type.floating_point_type
 
 #ifdef __cplusplus
 }
