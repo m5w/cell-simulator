@@ -1,15 +1,5 @@
 #include "lerp_cell_voltage.h"
 
-LerpCellVoltageLinearForwardBufType lerp_cell_voltage_linear_forward_buf_type(
-    const CellDischargeCurvePoint *const points,
-    const size_t number_of_points) {
-  const LerpCellVoltageLinearForwardBufType buf = {
-      .state = LINEAR_FORWARD,
-      .points_end = points + number_of_points,
-      .points_iterator = points};
-  return buf;
-}
-
 LerpCellVoltageLinearBufType
 lerp_cell_voltage_linear_buf_type(const CellDischargeCurvePoint *const points,
                                   const size_t number_of_points) {
@@ -21,16 +11,23 @@ lerp_cell_voltage_linear_buf_type(const CellDischargeCurvePoint *const points,
   return buf;
 }
 
-FloatingPointType lerp_cell_voltage_linear_forward(
-    LerpCellVoltageLinearForwardBufType *const buf_pointer,
-    const FloatingPointType charge) {
-  const CellDischargeCurvePoint *points_end;
-  const CellDischargeCurvePoint *points_iterator;
-  FloatingPointType point_charge;
-  const CellDischargeCurvePoint *next_points_iterator;
-  FloatingPointType next_point_charge;
-  FloatingPointType point_voltage;
-  FloatingPointType m;
+LerpCellVoltageBinaryBufType
+lerp_cell_voltage_binary_buf_type(const CellDischargeCurvePoint *const points,
+                                  const size_t number_of_points) {
+  if (number_of_points < 2) {
+    error = EXTRAPOLATION;
+    return ERROR_LERP_CELL_VOLTAGE_BINARY_BUF_TYPE;
+  }
+
+  const CellDischargeCurvePoint *const points_back_pointer =
+      points + number_of_points - 1;
+  const LerpCellVoltageBinaryBufType buf = {
+      .points_front_charge = points->charge_discharged_from_cell,
+      .points_back_charge = points_back_pointer->charge_discharged_from_cell,
+      .state = BINARY,
+      .points_front_pointer = points,
+      .points_back_pointer = points_back_pointer};
+  return buf;
 }
 
 FloatingPointType
@@ -364,15 +361,345 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
 
     INC_ITERATOR;
   }
+
+#undef CMP_FIRST_ITERATOR_AE
+#undef CMP_FIRST_CHARGE_B
+#undef RET_FIRST_VOLTAGE
+#undef CMP_FIRST_NEXT_ITERATOR_AE
+#undef VOLTAGE_LERP_FIRST
+#undef RET_VOLTAGE_INC
+#undef CMP_ITERATOR_B
+#undef DEC_ITERATOR
+#undef RET_VOLTAGE_DEC
+#undef LERP
+#undef CMP_NEXT_ITERATOR_AE
+#undef VOLTAGE_LERP
+#undef INC_ITERATOR
+#undef LERP_FIRST
 }
 
-FloatingPointType lerp_cell_voltage_get_m(
-    const FloatingPointType point_charge,
-    const CellDischargeCurvePoint *const next_points_iterator,
-    const FloatingPointType next_point_charge,
-    const FloatingPointType point_voltage) {
-  return (next_points_iterator->cell_voltage - point_voltage) /
-         (next_point_charge - point_charge);
+FloatingPointType
+lerp_cell_voltage_binary(LerpCellVoltageBinaryBufType *const buf_pointer,
+                         const FloatingPointType charge) {
+  if (charge < buf_pointer->points_front_charge) {
+    error = EXTRAPOLATION_BELOW;
+    return ERROR_FLOATING_POINT_TYPE;
+  }
+
+  if (charge > buf_pointer->points_back_charge) {
+    error = EXTRAPOLATION_ABOVE;
+    return ERROR_FLOATING_POINT_TYPE;
+  }
+
+#define GET_NUMBER_OF_EDGES                                                   \
+  number_of_edges = points_back_pointer - points_front_pointer
+
+#define LERP                                                                  \
+  point_charge = points_back_pointer->charge_discharged_from_cell;            \
+  point_voltage = points_back_pointer->cell_voltage;                          \
+  m = lerp_cell_voltage_get_m(                                                \
+      point_charge, points_front_pointer,                                     \
+      points_front_pointer->charge_discharged_from_cell, point_voltage);      \
+  buf_pointer->state = BINARY_B_M_CMP_CHARGE;                                 \
+  buf_pointer->points_iterator = points_back_pointer;                         \
+  buf_pointer->point_charge = point_charge;                                   \
+  buf_pointer->point_voltage = point_voltage;                                 \
+  buf_pointer->m = m;                                                         \
+  return lerp(point_charge, point_voltage, m, charge)
+
+#define GET_CHARGE                                                            \
+  points_iterator = points_front_pointer + number_of_edges / 2;               \
+  point_charge = points_iterator->charge_discharged_from_cell
+
+#define RET_VOLTAGE                                                           \
+  point_voltage = points_iterator->cell_voltage;                              \
+  buf_pointer->state = BINARY_VOLTAGE_CMP_CHARGE;                             \
+  buf_pointer->points_iterator = points_iterator;                             \
+  buf_pointer->point_charge = point_charge;                                   \
+  buf_pointer->point_voltage = point_voltage;                                 \
+  return point_voltage
+
+#define VOLTAGE_CMP_CHARGE_E                                                  \
+  if (charge == point_charge)                                                 \
+  return buf_pointer->point_voltage
+
+#define VOLTAGE_LERP_B                                                        \
+  point_voltage = buf_pointer->point_voltage;                                 \
+  m = lerp_cell_voltage_get_m(                                                \
+      point_charge, points_front_pointer,                                     \
+      points_front_pointer->charge_discharged_from_cell, point_voltage);      \
+  buf_pointer->state = BINARY_B_M_CMP_CHARGE;                                 \
+  buf_pointer->m = m;                                                         \
+  return lerp(point_charge, point_voltage, m, charge)
+
+#define LERP_B                                                                \
+  point_voltage = points_iterator->cell_voltage;                              \
+  m = lerp_cell_voltage_get_m(                                                \
+      point_charge, points_front_pointer,                                     \
+      points_front_pointer->charge_discharged_from_cell, point_voltage);      \
+  buf_pointer->state = BINARY_B_M_CMP_CHARGE;                                 \
+  buf_pointer->points_iterator = points_iterator;                             \
+  buf_pointer->point_charge = point_charge;                                   \
+  buf_pointer->point_voltage = point_voltage;                                 \
+  buf_pointer->m = m;                                                         \
+  return lerp(point_charge, point_voltage, m, charge)
+
+#define B_M_CMP_NEXT_CHARGE_A                                                 \
+  if (charge > next_point_charge)                                             \
+  return lerp(point_charge, buf_pointer->point_voltage, buf_pointer->m, charge)
+
+#define B_M_RET_NEXT_VOLTAGE                                                  \
+  point_voltage = next_points_iterator->cell_voltage;                         \
+  buf_pointer->state = BINARY_A_M_CMP_CHARGE;                                 \
+  buf_pointer->points_iterator = next_points_iterator;                        \
+  buf_pointer->point_charge = next_point_charge;                              \
+  buf_pointer->point_voltage = point_voltage;                                 \
+  return point_voltage
+
+#define A_M_CMP_NEXT_CHARGE_B                                                 \
+  if (charge < next_point_charge)                                             \
+  return lerp(point_charge, buf_pointer->point_voltage, buf_pointer->m, charge)
+
+#define A_M_RET_NEXT_VOLTAGE                                                  \
+  point_voltage = next_points_iterator->cell_voltage;                         \
+  buf_pointer->state = BINARY_B_M_CMP_CHARGE;                                 \
+  buf_pointer->points_iterator = next_points_iterator;                        \
+  buf_pointer->point_charge = next_point_charge;                              \
+  buf_pointer->point_voltage = point_voltage;                                 \
+  return point_voltage
+
+#define LERP_A                                                                \
+  point_voltage = points_iterator->cell_voltage;                              \
+  m = lerp_cell_voltage_get_m(                                                \
+      point_charge, points_back_pointer,                                      \
+      points_back_pointer->charge_discharged_from_cell, point_voltage);       \
+  buf_pointer->state = BINARY_A_M_CMP_CHARGE;                                 \
+  buf_pointer->points_iterator = points_iterator;                             \
+  buf_pointer->point_charge = point_charge;                                   \
+  buf_pointer->point_voltage = point_voltage;                                 \
+  buf_pointer->m = m;                                                         \
+  return lerp(point_charge, point_voltage, m, charge)
+
+#define NEXT_ITERATOR                                                         \
+  for (;;) {                                                                  \
+    GET_CHARGE;                                                               \
+                                                                              \
+    if (charge == point_charge) {                                             \
+      RET_VOLTAGE;                                                            \
+    }                                                                         \
+                                                                              \
+    if (charge < point_charge) {                                              \
+      points_back_pointer = points_iterator;                                  \
+      GET_NUMBER_OF_EDGES;                                                    \
+                                                                              \
+      if (number_of_edges <= 1) {                                             \
+        LERP_B;                                                               \
+      }                                                                       \
+                                                                              \
+      continue;                                                               \
+    }                                                                         \
+                                                                              \
+    points_front_pointer = points_iterator;                                   \
+    GET_NUMBER_OF_EDGES;                                                      \
+                                                                              \
+    if (number_of_edges <= 1) {                                               \
+      LERP_A;                                                                 \
+    }                                                                         \
+  } //
+
+#define VOLTAGE_LERP_A                                                        \
+  point_voltage = buf_pointer->point_voltage;                                 \
+  m = lerp_cell_voltage_get_m(                                                \
+      point_charge, points_back_pointer,                                      \
+      points_back_pointer->charge_discharged_from_cell, point_voltage);       \
+  buf_pointer->state = BINARY_A_M_CMP_CHARGE;                                 \
+  buf_pointer->m = m;                                                         \
+  return lerp(point_charge, point_voltage, m, charge)
+
+  const CellDischargeCurvePoint *points_front_pointer;
+  const CellDischargeCurvePoint *points_back_pointer;
+  const CellDischargeCurvePoint *points_iterator;
+  FloatingPointType point_charge;
+  FloatingPointType point_voltage;
+  FloatingPointType m;
+
+  size_t number_of_edges;
+  const CellDischargeCurvePoint *next_points_iterator;
+  FloatingPointType next_point_charge;
+
+  switch (buf_pointer->state) {
+  case BINARY:
+    points_front_pointer = buf_pointer->points_front_pointer;
+    points_back_pointer = buf_pointer->points_back_pointer;
+    GET_NUMBER_OF_EDGES;
+
+    if (number_of_edges <= 1) {
+      LERP;
+    }
+
+    for (;;) {
+      GET_CHARGE;
+
+      if (charge == point_charge) {
+        RET_VOLTAGE;
+      case BINARY_VOLTAGE_CMP_CHARGE:
+        point_charge = buf_pointer->point_charge;
+
+        VOLTAGE_CMP_CHARGE_E;
+
+        if (charge < point_charge) {
+          points_front_pointer = buf_pointer->points_front_pointer;
+          points_back_pointer = buf_pointer->points_iterator;
+          GET_NUMBER_OF_EDGES;
+
+          if (number_of_edges <= 1) {
+            VOLTAGE_LERP_B;
+          }
+
+          for (;;) {
+            GET_CHARGE;
+
+            if (charge == point_charge) {
+              RET_VOLTAGE;
+            }
+
+            if (charge < point_charge) {
+              points_back_pointer = points_iterator;
+              GET_NUMBER_OF_EDGES;
+
+              if (number_of_edges <= 1) {
+                LERP_B;
+              case BINARY_B_M_CMP_CHARGE:
+                point_charge = buf_pointer->point_charge;
+
+                VOLTAGE_CMP_CHARGE_E;
+
+                if (charge < point_charge) {
+                  next_points_iterator = buf_pointer->points_iterator - 1;
+                  next_point_charge =
+                      next_points_iterator->charge_discharged_from_cell;
+
+                  B_M_CMP_NEXT_CHARGE_A;
+
+                  if (charge == next_point_charge) {
+                    B_M_RET_NEXT_VOLTAGE;
+                  case BINARY_A_M_CMP_CHARGE:
+                    point_charge = buf_pointer->point_charge;
+
+                    VOLTAGE_CMP_CHARGE_E;
+
+                    if (charge > point_charge) {
+                      next_points_iterator = buf_pointer->points_iterator + 1;
+                      next_point_charge =
+                          next_points_iterator->charge_discharged_from_cell;
+
+                      A_M_CMP_NEXT_CHARGE_B;
+
+                      if (charge == next_point_charge) {
+                        A_M_RET_NEXT_VOLTAGE;
+                      }
+
+                      points_front_pointer = next_points_iterator;
+                      points_back_pointer = buf_pointer->points_back_pointer;
+                      GET_NUMBER_OF_EDGES;
+
+                      if (number_of_edges <= 1) {
+                        LERP_A;
+                      }
+
+                      NEXT_ITERATOR;
+                    }
+
+                    points_front_pointer = buf_pointer->points_front_pointer;
+                    points_back_pointer = buf_pointer->points_iterator;
+                    GET_NUMBER_OF_EDGES;
+
+                    if (number_of_edges <= 1) {
+                      VOLTAGE_LERP_B;
+                    }
+
+                    NEXT_ITERATOR;
+                  }
+
+                  points_front_pointer = buf_pointer->points_front_pointer;
+                  points_back_pointer = next_points_iterator;
+                  GET_NUMBER_OF_EDGES;
+
+                  if (number_of_edges <= 1) {
+                    LERP_B;
+                  }
+
+                  NEXT_ITERATOR;
+                }
+
+                points_front_pointer = buf_pointer->points_iterator;
+                points_back_pointer = buf_pointer->points_back_pointer;
+                GET_NUMBER_OF_EDGES;
+
+                if (number_of_edges <= 1) {
+                  VOLTAGE_LERP_A;
+                }
+
+                NEXT_ITERATOR;
+              }
+
+              continue;
+            }
+
+            points_front_pointer = points_iterator;
+            GET_NUMBER_OF_EDGES;
+
+            if (number_of_edges <= 1) {
+              LERP_A;
+            }
+          }
+        }
+
+        points_front_pointer = buf_pointer->points_iterator;
+        points_back_pointer = buf_pointer->points_back_pointer;
+        GET_NUMBER_OF_EDGES;
+
+        if (number_of_edges <= 1) {
+          VOLTAGE_LERP_A;
+        }
+
+        NEXT_ITERATOR;
+      }
+
+      if (charge < point_charge) {
+        points_back_pointer = points_iterator;
+        GET_NUMBER_OF_EDGES;
+
+        if (number_of_edges <= 1) {
+          LERP_B;
+        }
+
+        continue;
+      }
+
+      points_front_pointer = points_iterator;
+      GET_NUMBER_OF_EDGES;
+
+      if (number_of_edges <= 1) {
+        LERP_A;
+      }
+    }
+  }
+
+#undef GET_NUMBER_OF_EDGES
+#undef LERP
+#undef GET_CHARGE
+#undef RET_VOLTAGE
+#undef VOLTAGE_CMP_CHARGE_E
+#undef VOLTAGE_LERP_B
+#undef LERP_B
+#undef B_M_CMP_NEXT_CHARGE_A
+#undef B_M_RET_NEXT_VOLTAGE
+#undef A_M_CMP_NEXT_CHARGE_B
+#undef A_M_RET_NEXT_VOLTAGE
+#undef LERP_A
+#undef NEXT_ITERATOR
+#undef VOLTAGE_LERP_A
 }
 
 FloatingPointType lerp(const FloatingPointType x_1,
