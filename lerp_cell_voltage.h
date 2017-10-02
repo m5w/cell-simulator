@@ -74,9 +74,6 @@ LerpCellVoltageBinaryBufType
 lerp_cell_voltage_binary_buf_type(const CellDischargeCurvePoint *const points,
                                   const size_t number_of_points);
 
-inline FloatingPointType lerp_cell_voltage(void *const buf_pointer,
-                                           const FloatingPointType charge);
-
 FloatingPointType
 lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
                          const FloatingPointType charge);
@@ -95,12 +92,6 @@ static FloatingPointType lerp(const FloatingPointType x_1,
                               const FloatingPointType y_1,
                               const FloatingPointType m,
                               const FloatingPointType x);
-
-FloatingPointType lerp_cell_voltage(void *const buf_pointer,
-                                    const FloatingPointType charge) {
-  return lerp_cell_voltage_linear((LerpCellVoltageLinearBufType *)buf_pointer,
-                                  charge);
-}
 
 FloatingPointType lerp_cell_voltage_get_m(
     const FloatingPointType point_charge,
