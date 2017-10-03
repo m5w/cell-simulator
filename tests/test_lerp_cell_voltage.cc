@@ -50,7 +50,21 @@ BOOST_AUTO_TEST_CASE(test_lerp_cell_voltage) {
       {+2.00f, +4.00f, NONE},
       {+2.00f, +4.00f, NONE},
       {+3.00f, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_ABOVE},
-      {+4.00F, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_ABOVE}};
+      {+4.00F, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_ABOVE},
+      {+4.00F, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_ABOVE},
+      {+3.00f, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_ABOVE},
+      {+2.00f, +4.00f, NONE},
+      {+2.00f, +4.00f, NONE},
+      {+1.75f, +3.50f, NONE},
+      {+1.50f, +3.00f, NONE},
+      {+1.00f, +2.00f, NONE},
+      {+1.00f, +2.00f, NONE},
+      {+0.75f, +1.75f, NONE},
+      {+0.50f, +1.50f, NONE},
+      {+0.00f, +1.00f, NONE},
+      {+0.00f, +1.00f, NONE},
+      {-1.00f, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_BELOW},
+      {-2.00f, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_BELOW}};
   const CheckLerpCellVoltageBufType *const bufs_end =
       bufs + sizeof(bufs) / sizeof(CheckLerpCellVoltageBufType);
 

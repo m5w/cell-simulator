@@ -264,6 +264,13 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
               RET_VOLTAGE_DEC;
             }
 
+            /* It is safe to increment and then dereference the iterator
+             * because it was decremented at least once.
+             */
+            next_points_iterator = points_iterator + 1;
+            next_point_charge =
+                next_points_iterator->charge_discharged_from_cell;
+
             LERP;
           case LINEAR_M_CMP_CHARGE:
             point_charge = buf_pointer->point_charge;
