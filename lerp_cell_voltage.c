@@ -200,8 +200,9 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
   buf_pointer->m = m;                                                         \
   return lerp(point_charge, point_voltage, m, charge)
 
-/* With the pointer-to-the-beginning of the curve and the iterator set, verify
- * that the iterator does not point before the start of the curve.
+/* With the pointer-to-the-beginning of the cell discharge curve and the
+ * iterator set, verify that the iterator does not point before the beginning
+ * of the curve.
  */
 #define CMP_ITERATOR_B                                                        \
   if (points_iterator < points_begin) {                                       \
@@ -219,6 +220,13 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
     CMP_ITERATOR_B;                                                           \
   } //
 
+/* With the iterator and amound of charge discharged from the cell set, get and
+ * then return the voltage across the cell's voltage source.  This should be
+ * run after the iterator has been decremented.
+ *
+ * Before returning, write the iterator, charge, and voltage and set the
+ * coroutine to re-enter at LINEAR_VOLTAGE_CMP_CHARGE.
+ */
 #define RET_VOLTAGE_DEC                                                       \
   point_voltage = points_iterator->cell_voltage;                              \
   buf_pointer->state = LINEAR_VOLTAGE_CMP_CHARGE;                             \
@@ -227,6 +235,22 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
   buf_pointer->point_voltage = point_voltage;                                 \
   return point_voltage
 
+/* This should be run after the iterator has been decremented.
+ */
+#define GET_NEXT_CHARGE_DEC                                                   \
+  /* It is safe to increment and then dereference the iterator because it has \
+   * been decremented at least once.                                          \
+   */                                                                         \
+  next_points_iterator = points_iterator + 1;                                 \
+  next_point_charge = next_points_iterator->charge_discharged_from_cell
+
+/* With the iterator, amount of charge discharged from the cell, next iterator
+ * and charge, and voltage across the cell's voltage source set, get the slope
+ * and then lerp.
+ *
+ * Before returning, write the next iterator and charge and slope and set the
+ * coroutine to re-enter at LINEAR_M_CMP_CHARGE.
+ */
 #define VOLTAGE_LERP                                                          \
   m = lerp_cell_voltage_get_m(point_charge, next_points_iterator,             \
                               next_point_charge, point_voltage);              \
@@ -329,51 +353,8 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
         RET_VOLTAGE_DEC;
       }
 
-      /* It is safe to increment and then dereference the iterator
-       * because it was decremented at least once.
-       */
-      next_points_iterator = points_iterator + 1;
-      next_point_charge = next_points_iterator->charge_discharged_from_cell;
-
+      GET_NEXT_CHARGE_DEC;
       LERP;
-    case LINEAR_M_CMP_CHARGE:
-      point_charge = buf_pointer->point_charge;
-
-      if (charge < point_charge) {
-        points_begin = buf_pointer->points_begin;
-        points_iterator = buf_pointer->points_iterator - 1;
-
-        DEC_ITERATOR;
-
-        if (charge == point_charge) {
-          RET_VOLTAGE_DEC;
-        }
-
-        /* It is safe to increment and then dereference the iterator
-         * because it was decremented at least once.
-         */
-        next_points_iterator = points_iterator + 1;
-        next_point_charge = next_points_iterator->charge_discharged_from_cell;
-
-        LERP;
-      }
-
-      if (charge == point_charge)
-        return buf_pointer->point_voltage;
-
-      next_point_charge = buf_pointer->next_point_charge;
-
-      if (charge < next_point_charge)
-        return lerp(buf_pointer->point_charge, buf_pointer->point_voltage,
-                    buf_pointer->m, charge);
-
-      points_iterator = buf_pointer->next_points_iterator;
-
-      if (charge == next_point_charge) {
-        RET_VOLTAGE_INC;
-      }
-
-      INC_ITERATOR;
     }
 
     if (charge == point_charge)
@@ -398,22 +379,56 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
     }
 
     INC_ITERATOR;
+  case LINEAR_M_CMP_CHARGE:
+    point_charge = buf_pointer->point_charge;
+
+    if (charge < point_charge) {
+      points_begin = buf_pointer->points_begin;
+      points_iterator = buf_pointer->points_iterator - 1;
+
+      DEC_ITERATOR;
+
+      if (charge == point_charge) {
+        RET_VOLTAGE_DEC;
+      }
+
+      GET_NEXT_CHARGE_DEC;
+      LERP;
+    }
+
+    if (charge == point_charge)
+      return buf_pointer->point_voltage;
+
+    next_point_charge = buf_pointer->next_point_charge;
+
+    if (charge < next_point_charge)
+      return lerp(buf_pointer->point_charge, buf_pointer->point_voltage,
+                  buf_pointer->m, charge);
+
+    points_iterator = buf_pointer->next_points_iterator;
+
+    if (charge == next_point_charge) {
+      RET_VOLTAGE_INC;
+    }
+
+    INC_ITERATOR;
   }
 
 #undef CMP_FIRST_ITERATOR_AE
 #undef CMP_FIRST_CHARGE_B
 #undef RET_FIRST_VOLTAGE
 #undef CMP_FIRST_NEXT_ITERATOR_AE
-#undef VOLTAGE_LERP_FIRST
+#undef LERP_FIRST
 #undef RET_VOLTAGE_INC
+#undef CMP_NEXT_ITERATOR_AE
+#undef LERP
+#undef INC_ITERATOR
+#undef VOLTAGE_LERP_FIRST
 #undef CMP_ITERATOR_B
 #undef DEC_ITERATOR
 #undef RET_VOLTAGE_DEC
-#undef LERP
-#undef CMP_NEXT_ITERATOR_AE
+#undef GET_NEXT_CHARGE_DEC
 #undef VOLTAGE_LERP
-#undef INC_ITERATOR
-#undef LERP_FIRST
 }
 
 FloatingPointType
