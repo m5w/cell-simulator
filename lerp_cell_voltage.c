@@ -339,6 +339,7 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
       RET_VOLTAGE_INC;
     }
 
+    points_end = buf_pointer->points_end;
     INC_ITERATOR;
   case LINEAR_VOLTAGE_CMP_CHARGE:
     point_charge = buf_pointer->point_charge;
@@ -411,6 +412,7 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
       RET_VOLTAGE_INC;
     }
 
+    points_end = buf_pointer->points_end;
     INC_ITERATOR;
   }
 
@@ -486,12 +488,12 @@ lerp_cell_voltage_binary(LerpCellVoltageBinaryBufType *const buf_pointer,
   return lerp(point_charge, point_voltage, m, charge)
 
 #define LERP_B                                                                \
-  point_voltage = points_iterator->cell_voltage;                              \
+  point_voltage = points_back_pointer->cell_voltage;                          \
   m = lerp_cell_voltage_get_m(                                                \
       point_charge, points_front_pointer,                                     \
       points_front_pointer->charge_discharged_from_cell, point_voltage);      \
   buf_pointer->state = BINARY_B_M_CMP_CHARGE;                                 \
-  buf_pointer->points_iterator = points_iterator;                             \
+  buf_pointer->points_iterator = points_back_pointer;                         \
   buf_pointer->point_charge = point_charge;                                   \
   buf_pointer->point_voltage = point_voltage;                                 \
   buf_pointer->m = m;                                                         \
@@ -522,12 +524,12 @@ lerp_cell_voltage_binary(LerpCellVoltageBinaryBufType *const buf_pointer,
   return point_voltage
 
 #define LERP_A                                                                \
-  point_voltage = points_iterator->cell_voltage;                              \
+  point_voltage = points_front_pointer->cell_voltage;                         \
   m = lerp_cell_voltage_get_m(                                                \
       point_charge, points_back_pointer,                                      \
       points_back_pointer->charge_discharged_from_cell, point_voltage);       \
   buf_pointer->state = BINARY_A_M_CMP_CHARGE;                                 \
-  buf_pointer->points_iterator = points_iterator;                             \
+  buf_pointer->points_iterator = points_front_pointer;                        \
   buf_pointer->point_charge = point_charge;                                   \
   buf_pointer->point_voltage = point_voltage;                                 \
   buf_pointer->m = m;                                                         \
@@ -657,6 +659,8 @@ lerp_cell_voltage_binary(LerpCellVoltageBinaryBufType *const buf_pointer,
                       GET_NUMBER_OF_EDGES;
 
                       if (number_of_edges <= 1) {
+                        point_charge =
+                            points_front_pointer->charge_discharged_from_cell;
                         LERP_A;
                       }
 
@@ -679,6 +683,8 @@ lerp_cell_voltage_binary(LerpCellVoltageBinaryBufType *const buf_pointer,
                   GET_NUMBER_OF_EDGES;
 
                   if (number_of_edges <= 1) {
+                    point_charge =
+                        points_back_pointer->charge_discharged_from_cell;
                     LERP_B;
                   }
 
