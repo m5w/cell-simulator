@@ -325,7 +325,7 @@ lerp_cell_voltage_linear(LerpCellVoltageLinearBufType *const buf_pointer,
     CMP_FIRST_CHARGE_B;
 
     if (charge == point_charge)
-      return buf_pointer->point_charge;
+      return buf_pointer->point_voltage;
 
     next_point_charge = buf_pointer->next_point_charge;
 
