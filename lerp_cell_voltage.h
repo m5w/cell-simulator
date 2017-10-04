@@ -28,8 +28,8 @@ enum LerpCellVoltageBinaryStateType {
 
 typedef struct LerpCellVoltageLinearBufType {
   enum LerpCellVoltageLinearStateType state;
-  const CellDischargeCurvePoint *const points_begin;
-  const CellDischargeCurvePoint *const points_end;
+  const CellDischargeCurvePoint *points_begin;
+  const CellDischargeCurvePoint *points_end;
   const CellDischargeCurvePoint *points_iterator;
   FloatingPointType point_charge;
   const CellDischargeCurvePoint *next_points_iterator;
@@ -47,11 +47,11 @@ const union {
   union_lerp_cell_voltage_linear_buf_type.lerp_cell_voltage_linear_buf_type
 
 typedef struct LerpCellVoltageBinaryBufType {
-  const FloatingPointType points_front_charge;
-  const FloatingPointType points_back_charge;
+  FloatingPointType points_front_charge;
+  FloatingPointType points_back_charge;
   enum LerpCellVoltageBinaryStateType state;
-  const CellDischargeCurvePoint *const points_front_pointer;
-  const CellDischargeCurvePoint *const points_back_pointer;
+  const CellDischargeCurvePoint *points_front_pointer;
+  const CellDischargeCurvePoint *points_back_pointer;
   const CellDischargeCurvePoint *points_iterator;
   FloatingPointType point_charge;
   FloatingPointType point_voltage;
