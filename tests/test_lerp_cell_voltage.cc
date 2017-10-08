@@ -16,14 +16,14 @@ static bool operator==(const LerpCellVoltageLinearBufType &a,
 static bool operator==(const LerpCellVoltageBinaryBufType &a,
                        const LerpCellVoltageBinaryBufType &b);
 
-typedef struct TestLerpCellVoltageSourceVoltageBufType {
+typedef struct TestLerpCellVoltageSouceVoltagePointErrorBufType {
   const FloatingPointType charge_discharged_from_cell;
   const FloatingPointType cell_voltage_source_voltage;
   const ErrorType the_error;
-} TestLerpCellVoltageSourceVoltageBufType;
+} TestLerpCellVoltageSouceVoltagePointErrorBufType;
 
-static inline void test_lerp_cell_voltage_source_voltage_buf(
-    const TestLerpCellVoltageSourceVoltageBufType buf,
+static inline void test_lerp_cell_voltage_souce_voltage_point_error(
+    const TestLerpCellVoltageSouceVoltagePointErrorBufType buf,
     LerpCellVoltageLinearBufType *const linear_buf_pointer,
     LerpCellVoltageBinaryBufType *const binary_buf_pointer);
 
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_lerp_cell_voltage_source_voltage) {
       lerp_cell_voltage_binary_buf_type(points, number_of_points);
   BOOST_REQUIRE(error == NONE);
 
-  const TestLerpCellVoltageSourceVoltageBufType bufs[] = {
+  const TestLerpCellVoltageSouceVoltagePointErrorBufType bufs[] = {
       {0.5f, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_BELOW},
       {1.0f, 2.0f, NONE},
       {1.5f, 3.0f, NONE},
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_lerp_cell_voltage_source_voltage) {
       {3.0f, 8.0f, NONE},
       {3.5f, ERROR_FLOATING_POINT_TYPE, EXTRAPOLATION_ABOVE}};
   const size_t number_of_bufs =
-      sizeof(bufs) / sizeof(TestLerpCellVoltageSourceVoltageBufType);
+      sizeof(bufs) / sizeof(TestLerpCellVoltageSouceVoltagePointErrorBufType);
   size_t bufs_indices[number_of_bufs] = {0};
   LerpCellVoltageLinearBufType linear_bufs[number_of_bufs];
   linear_bufs[0] = linear_buf;
@@ -61,17 +61,6 @@ BOOST_AUTO_TEST_CASE(test_lerp_cell_voltage_source_voltage) {
   size_t bufs_indices_index = 0;
 
   for (;;) {
-    std::cerr << std::string(bufs_indices_index, ' ')
-              << bufs_indices[bufs_indices_index] << '\n';
-    LerpCellVoltageLinearBufType the_linear_buf =
-        linear_bufs[bufs_indices_index];
-    LerpCellVoltageBinaryBufType the_binary_buf =
-        binary_bufs[bufs_indices_index];
-    test_lerp_cell_voltage_source_voltage_buf(
-        bufs[bufs_indices[bufs_indices_index]], &the_linear_buf,
-        &the_binary_buf);
-    ++bufs_indices[bufs_indices_index];
-
     if (bufs_indices[bufs_indices_index] >= number_of_bufs) {
       if (bufs_indices_index == 0)
         break;
@@ -80,6 +69,16 @@ BOOST_AUTO_TEST_CASE(test_lerp_cell_voltage_source_voltage) {
       continue;
     }
 
+    std::cout << std::string(bufs_indices_index, ' ')
+              << bufs_indices[bufs_indices_index] << '\n';
+    LerpCellVoltageLinearBufType the_linear_buf =
+        linear_bufs[bufs_indices_index];
+    LerpCellVoltageBinaryBufType the_binary_buf =
+        binary_bufs[bufs_indices_index];
+    test_lerp_cell_voltage_souce_voltage_point_error(
+        bufs[bufs_indices[bufs_indices_index]], &the_linear_buf,
+        &the_binary_buf);
+    ++bufs_indices[bufs_indices_index];
     ++bufs_indices_index;
 
     if (bufs_indices_index >= number_of_bufs) {
@@ -121,8 +120,8 @@ bool operator==(const LerpCellVoltageBinaryBufType &a,
          a.point_voltage == b.point_voltage && a.m == b.m;
 }
 
-void test_lerp_cell_voltage_source_voltage_buf(
-    const TestLerpCellVoltageSourceVoltageBufType buf,
+void test_lerp_cell_voltage_souce_voltage_point_error(
+    const TestLerpCellVoltageSouceVoltagePointErrorBufType buf,
     LerpCellVoltageLinearBufType *const linear_buf_pointer,
     LerpCellVoltageBinaryBufType *const binary_buf_pointer) {
   if (buf.the_error != NONE) {
