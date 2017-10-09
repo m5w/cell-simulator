@@ -22,7 +22,7 @@ static void test_lerp_point_error(const TestLerpPointErrorBuf &buf,
 BOOST_AUTO_TEST_CASE(test_lerp) {
   BOOST_REQUIRE(lerp_error == NONE);
 
-  const std::vector<Point> points = {{1.0f, 2.0f}, {2.0f, 4.0f}, {3.0f, 8.0f}};
+  const std::vector<Point> points = {{1.0, 2.0}, {2.0, 4.0}, {3.0, 8.0}};
 
   LerpLinearBuf linear_buf = lerp_linear_buf(points.data(), points.size());
   BOOST_REQUIRE(lerp_error == NONE);
@@ -30,13 +30,13 @@ BOOST_AUTO_TEST_CASE(test_lerp) {
   BOOST_REQUIRE(lerp_error == NONE);
 
   const std::vector<TestLerpPointErrorBuf> test_lerp_bufs = {
-      {0.5f, DEFAULT_FLOATING_POINT_TYPE, EXTRAPOLATION_BELOW},
-      {1.0f, 2.0f, NONE},
-      {1.5f, 3.0f, NONE},
-      {2.0f, 4.0f, NONE},
-      {2.5f, 6.0f, NONE},
-      {3.0f, 8.0f, NONE},
-      {3.5f, DEFAULT_FLOATING_POINT_TYPE, EXTRAPOLATION_ABOVE}};
+      {0.5, DEFAULT_FLOATING_POINT_TYPE, EXTRAPOLATION_BELOW},
+      {1.0, 2.0, NONE},
+      {1.5, 3.0, NONE},
+      {2.0, 4.0, NONE},
+      {2.5, 6.0, NONE},
+      {3.0, 8.0, NONE},
+      {3.5, DEFAULT_FLOATING_POINT_TYPE, EXTRAPOLATION_ABOVE}};
 
   std::vector<std::size_t> test_lerp_bufs_indices(test_lerp_bufs.size(), 0);
   std::vector<LerpLinearBuf> linear_bufs(test_lerp_bufs.size());

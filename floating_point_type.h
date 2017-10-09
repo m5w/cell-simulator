@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-typedef float FloatingPointType;
+typedef double FloatingPointType;
 
 const struct {
   FloatingPointType default_floating_point_type;
