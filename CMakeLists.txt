@@ -9,4 +9,8 @@ set (CMAKE_CXX_STANDARD 14)
 add_library (lerp
         lerp.c
         )
+add_library (cell
+        cell_discharge_curve.cc
+        )
+target_link_libraries (cell lerp)
 add_subdirectory (tests)
