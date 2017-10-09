@@ -14,6 +14,17 @@ CellDischargeCurve::CellDischargeCurve(std::istream &is) {
           sizeof(mean_internal_conductance));
 }
 
+const Point *CellDischargeCurve::get_points() const { return points.data(); }
+
+const std::size_t CellDischargeCurve::get_number_of_points() const {
+  return points.size();
+}
+
+const FloatingPointType
+CellDischargeCurve::get_mean_internal_conductance() const {
+  return mean_internal_conductance;
+}
+
 Point CellDischargeCurve::read_point(std::istream &is) {
   FloatingPointType x;
   is.read(reinterpret_cast<char *>(&x), sizeof(x));
