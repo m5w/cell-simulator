@@ -8,6 +8,7 @@ set (CMAKE_C_STANDARD 11)
 set (CMAKE_CXX_STANDARD 14)
 add_library (lerp
         lerp.c
+        point.cc
         )
 add_library (cell
         cell_discharge_curve.cc

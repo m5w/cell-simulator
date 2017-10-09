@@ -10,10 +10,10 @@
 
 class CellDischargeCurve {
 public:
-  CellDischargeCurve(std::basic_istream<unsigned char> &is);
+  CellDischargeCurve(std::istream &is);
 
 private:
-  Point read_point(std::basic_istream<unsigned char> &is);
+  Point read_point(std::istream &is);
   std::vector<Point> points;
   FloatingPointType mean_internal_conductance;
 };
