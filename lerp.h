@@ -19,6 +19,13 @@ typedef enum LerpLinearState {
   LINEAR_M_CMP_X
 } LerpLinearState;
 
+const struct {
+  LerpLinearState default_lerp_linear_state;
+} default_lerp_linear_state = {};
+
+#define DEFAULT_LERP_LINEAR_STATE                                             \
+  default_lerp_linear_state.default_lerp_linear_state
+
 typedef struct LerpLinearBuf {
   LerpLinearState state;
   const Point *points_end;
@@ -57,6 +64,13 @@ typedef enum LerpBinaryState {
   BINARY_B_M_CMP_X,
   BINARY_A_M_CMP_X
 } LerpBinaryState;
+
+const struct {
+  LerpBinaryState default_lerp_binary_state;
+} default_lerp_binary_state = {};
+
+#define DEFAULT_LERP_BINARY_STATE                                             \
+  default_lerp_binary_state.default_lerp_binary_state
 
 typedef struct LerpBinaryBuf {
   FloatingPointType points_front_x;
@@ -97,6 +111,12 @@ typedef enum LerpError {
   EXTRAPOLATION_BELOW,
   EXTRAPOLATION_ABOVE
 } LerpError;
+
+const struct {
+  LerpError default_lerp_error;
+} default_lerp_error = {};
+
+#define DEFAULT_LERP_ERROR default_lerp_error.default_lerp_error
 
 extern LerpError lerp_error;
 
