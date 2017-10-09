@@ -7,14 +7,12 @@ extern "C" {
 
 typedef float FloatingPointType;
 
-FloatingPointType error_floating_point_type;
+const struct {
+  FloatingPointType default_floating_point_type;
+} default_floating_point_type = {};
 
-const union {
-  const FloatingPointType floating_point_type;
-  const unsigned char s[sizeof(FloatingPointType)];
-} union_floating_point_type = {.s = {0}};
-
-#define ERROR_FLOATING_POINT_TYPE union_floating_point_type.floating_point_type
+#define DEFAULT_FLOATING_POINT_TYPE                                           \
+  default_floating_point_type.default_floating_point_type
 
 #ifdef __cplusplus
 }

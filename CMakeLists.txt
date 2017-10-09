@@ -6,8 +6,7 @@ include_directories (${Boost_INCLUDE_DIRS})
 include_directories (${PROJECT_SOURCE_DIR})
 set (CMAKE_C_STANDARD 11)
 set (CMAKE_CXX_STANDARD 14)
-add_library (cell
-        error.c
-        lerp_cell_voltage.c
+add_library (lerp
+        lerp.c
         )
 add_subdirectory (tests)
