@@ -12,7 +12,11 @@ add_library (lerp
         point.cc
         )
 add_library (cell
+        cell.cc
         cell_discharge_curve.cc
         )
-target_link_libraries (cell lerp)
+target_link_libraries (cell
+        ${Boost_LIBRARIES}
+        lerp
+        )
 add_subdirectory (tests)
