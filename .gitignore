@@ -9,4 +9,5 @@ cmake_install.cmake
 /CMakeCache.txt
 /compile_commands.json
 
+/tests/read
 /tests/test-lerp-cell-voltage

@@ -15,19 +15,20 @@ CellDischargeCurve::CellDischargeCurve(std::istream &is) {
   is.read(reinterpret_cast<char *>(&is_number_of_points),
           sizeof(is_number_of_points));
   const std::size_t number_of_points = is_number_of_points;
-  points.reserve(number_of_points);
+  CellDischargeCurve::points.reserve(number_of_points);
 
   for (std::size_t points_index = 0; points_index < number_of_points;
        ++points_index)
-    points.push_back(read_point(is));
+    CellDischargeCurve::points.push_back(read_point(is));
 
-  buf = lerp_linear_buf(get_points(), get_number_of_points());
+  CellDischargeCurve::buf =
+      lerp_linear_buf(get_points(), get_number_of_points());
 }
 
 FloatingPointType CellDischargeCurve::lerp_voltage_source_voltage(
     const FloatingPointType charge_discharged_from_cell) const {
   const FloatingPointType voltage_source_voltage =
-      lerp_linear(&buf, charge_discharged_from_cell);
+      lerp_linear(&(CellDischargeCurve::buf), charge_discharged_from_cell);
 
   if (BOOST_UNLIKELY(lerp_error != NONE))
     throw;

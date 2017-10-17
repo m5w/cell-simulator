@@ -26,10 +26,12 @@ private:
   inline std::size_t get_number_of_points() const;
 };
 
-const Point *CellDischargeCurve::get_points() const { return points.data(); }
+const Point *CellDischargeCurve::get_points() const {
+  return CellDischargeCurve::points.data();
+}
 
 std::size_t CellDischargeCurve::get_number_of_points() const {
-  return points.size();
+  return CellDischargeCurve::points.size();
 }
 
 #endif
