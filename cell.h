@@ -13,6 +13,7 @@ public:
   FloatingPointType
   get_next_voltage_source_voltage(const FloatingPointType change_in_time,
                                   const FloatingPointType module_voltage);
+  FloatingPointType get_electric_potential_energy() const;
 
 private:
   inline FloatingPointType get_voltage_source_voltage(

@@ -92,7 +92,8 @@ extern "C" {
 
 typedef enum LerpError {
   NONE,
-  EXTRAPOLATION,
+  UNDEFINED,
+  NUMBER_OF_POINTS_BELOW_TWO,
   EXTRAPOLATION_BELOW,
   EXTRAPOLATION_ABOVE
 } LerpError;
@@ -108,13 +109,29 @@ extern LerpError lerp_error;
 FloatingPointType lerp_linear(LerpLinearBuf *const buf_pointer,
                               const FloatingPointType x);
 
+FloatingPointType
+lerp_z_linear(const LerpLinearBuf *const buf_pointer,
+              const FloatingPointType x,
+              FloatingPointType (*const get_z_pointer)(const Point *const));
+
 FloatingPointType lerp_binary(LerpBinaryBuf *const buf_pointer,
                               const FloatingPointType x);
+
+FloatingPointType
+lerp_z_binary(const LerpBinaryBuf *const buf_pointer,
+              const FloatingPointType x,
+              FloatingPointType (*const get_z_pointer)(const Point *const));
 
 static inline FloatingPointType get_m(const FloatingPointType point_x,
                                       const Point *const next_points_iterator,
                                       const FloatingPointType next_point_x,
                                       const FloatingPointType point_y);
+
+static inline FloatingPointType
+get_z_m(const FloatingPointType point_x,
+        const Point *const next_points_iterator,
+        const FloatingPointType point_z,
+        FloatingPointType (*const get_z_pointer)(const Point *const));
 
 static inline FloatingPointType lerp(const FloatingPointType x_1,
                                      const FloatingPointType y_1,
@@ -126,6 +143,15 @@ FloatingPointType get_m(const FloatingPointType point_x,
                         const FloatingPointType next_point_x,
                         const FloatingPointType point_y) {
   return (next_points_iterator->y - point_y) / (next_point_x - point_x);
+}
+
+FloatingPointType
+get_z_m(const FloatingPointType point_x,
+        const Point *const next_points_iterator,
+        const FloatingPointType point_z,
+        FloatingPointType (*const get_z_pointer)(const Point *const)) {
+  return (get_z_pointer(next_points_iterator) - point_z) /
+         (next_points_iterator->x - point_x);
 }
 
 FloatingPointType lerp(const FloatingPointType x_1,

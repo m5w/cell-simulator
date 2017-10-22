@@ -1,6 +1,8 @@
 #include <cstddef>
+
 #include <fstream>
 #include <iostream>
+#include <limits>
 
 #include "cell.h"
 
@@ -16,13 +18,14 @@ int main() {
   FloatingPointType cell_mean_internal_conductance;
   FloatingPointType cell_voltage_source_voltage;
   Cell cell(is, cell_mean_internal_conductance, cell_voltage_source_voltage);
-  constexpr FloatingPointType load_current = 0.2;
+  constexpr FloatingPointType load_current = 5.0;
   FloatingPointType module_voltage =
       get_module_voltage(load_current, cell_voltage_source_voltage,
                          cell_mean_internal_conductance);
   FloatingPointType time = 0.0;
   constexpr FloatingPointType change_in_time = 1.0;
   std::size_t number_of_changes_in_time = 0;
+  std::cout.precision(std::numeric_limits<FloatingPointType>::max_digits10);
 
   while (module_voltage >= 2.5) {
     std::cout << time << ", " << module_voltage << '\n';
@@ -34,6 +37,8 @@ int main() {
     ++number_of_changes_in_time;
     time = change_in_time * number_of_changes_in_time;
   }
+
+  std::cout << cell.get_electric_potential_energy() << '\n';
 }
 
 FloatingPointType

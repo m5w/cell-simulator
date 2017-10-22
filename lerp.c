@@ -3,7 +3,7 @@
 LerpLinearBuf lerp_linear_buf(const Point *const points,
                               const size_t number_of_points) {
   if (number_of_points < 2) {
-    lerp_error = EXTRAPOLATION;
+    lerp_error = NUMBER_OF_POINTS_BELOW_TWO;
     return default_lerp_linear_buf;
   }
 
@@ -18,7 +18,7 @@ LerpLinearBuf lerp_linear_buf(const Point *const points,
 LerpBinaryBuf lerp_binary_buf(const Point *const points,
                               const size_t number_of_points) {
   if (number_of_points < 2) {
-    lerp_error = EXTRAPOLATION;
+    lerp_error = NUMBER_OF_POINTS_BELOW_TWO;
     return default_lerp_binary_buf;
   }
 
@@ -419,6 +419,30 @@ FloatingPointType lerp_linear(LerpLinearBuf *const buf_pointer,
 #undef Y_LERP
 }
 
+FloatingPointType
+lerp_z_linear(const LerpLinearBuf *const buf_pointer,
+              const FloatingPointType x,
+              FloatingPointType (*const get_z_pointer)(const Point *const)) {
+  switch (buf_pointer->state) {
+  case LINEAR:
+    lerp_error = UNDEFINED;
+    return DEFAULT_FLOATING_POINT_TYPE;
+  case LINEAR_Y_CMP_FIRST_X:
+  case LINEAR_Y_CMP_X:
+    return get_z_pointer(buf_pointer->points_iterator);
+  case LINEAR_M_CMP_FIRST_X:
+  case LINEAR_M_CMP_X: {
+    const FloatingPointType point_x = buf_pointer->point_x;
+    const FloatingPointType point_z =
+        get_z_pointer(buf_pointer->points_iterator);
+    return lerp(point_x, point_z,
+                get_z_m(point_x, buf_pointer->next_points_iterator, point_z,
+                        get_z_pointer),
+                x);
+  }
+  }
+}
+
 FloatingPointType lerp_binary(LerpBinaryBuf *const buf_pointer,
                               const FloatingPointType x) {
   if (x < buf_pointer->points_front_x) {
@@ -672,4 +696,35 @@ FloatingPointType lerp_binary(LerpBinaryBuf *const buf_pointer,
 #undef Y_LERP_A
 #undef B_M_RET_NEXT_Y
 #undef A_M_RET_NEXT_Y
+}
+
+FloatingPointType
+lerp_z_binary(const LerpBinaryBuf *const buf_pointer,
+              const FloatingPointType x,
+              FloatingPointType (*const get_z_pointer)(const Point *const)) {
+  switch (buf_pointer->state) {
+  case BINARY:
+    lerp_error = UNDEFINED;
+    return DEFAULT_FLOATING_POINT_TYPE;
+  case BINARY_Y_CMP_X:
+    return get_z_pointer(buf_pointer->points_iterator);
+  case BINARY_B_M_CMP_X: {
+    const FloatingPointType point_x = buf_pointer->point_x;
+    const FloatingPointType point_z =
+        get_z_pointer(buf_pointer->points_iterator);
+    return lerp(point_x, point_z,
+                get_z_m(point_x, buf_pointer->points_front_pointer, point_z,
+                        get_z_pointer),
+                x);
+  }
+  case BINARY_A_M_CMP_X: {
+    const FloatingPointType point_x = buf_pointer->point_x;
+    const FloatingPointType point_z =
+        get_z_pointer(buf_pointer->points_iterator);
+    return lerp(point_x, point_z,
+                get_z_m(point_x, buf_pointer->points_back_pointer, point_z,
+                        get_z_pointer),
+                x);
+  }
+  }
 }

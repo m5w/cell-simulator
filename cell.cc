@@ -32,3 +32,8 @@ Cell::get_next_voltage_source_voltage(const FloatingPointType change_in_time,
   Cell::voltage_source_voltage = the_voltage_source_voltage;
   return the_voltage_source_voltage;
 }
+
+FloatingPointType Cell::get_electric_potential_energy() const {
+  return Cell::discharge_curve.lerp_electric_potential_energy(
+      Cell::charge_discharged_from_cell);
+}

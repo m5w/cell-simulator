@@ -10,6 +10,7 @@ extern "C" {
 typedef struct Point {
   FloatingPointType x;
   FloatingPointType y;
+  FloatingPointType *z_pointer;
 } Point;
 
 const Point default_point = {};
