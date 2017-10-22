@@ -13,41 +13,41 @@
 #include "floating_point_type.h"
 #include "lerp.h"
 #include "point.h"
+#include "read.h"
 
 class CellDischargeCurve {
 public:
-  CellDischargeCurve(std::istream &is);
-  inline FloatingPointType get_initial_electric_potential_energy() const;
+  CellDischargeCurve(const std::vector<FloatingPointType> &point_work_values,
+                     const std::vector<Point> &points);
+  inline FloatingPointType get_initial_work() const;
   FloatingPointType lerp_voltage_source_voltage(
       const FloatingPointType charge_discharged_from_cell) const;
-  FloatingPointType lerp_electric_potential_energy(
-      const FloatingPointType charge_discharged_from_cell) const;
+  FloatingPointType
+  lerp_work(const FloatingPointType charge_discharged_from_cell) const;
 
 private:
-  template <class T> static inline T read(std::istream &is);
-  Point read_point(std::istream &is);
-  static inline FloatingPointType
-  point_get_electric_potential_energy(const Point *const point);
+  static inline FloatingPointType point_get_work(const Point *const point);
   inline const Point *get_points() const;
   inline std::size_t get_number_of_points() const;
-  std::vector<FloatingPointType> point_electric_potential_energy_values;
-  std::vector<Point> points;
+  const std::vector<FloatingPointType> &point_work_values;
+  const std::vector<Point> &points;
   mutable LerpLinearBuf buf;
 };
 
+CellDischargeCurve
+read_cell_discharge_curve(std::istream &is,
+                          std::vector<FloatingPointType> &point_work_values,
+                          std::vector<Point> &points);
+static Point read_point(std::istream &is,
+                        std::vector<FloatingPointType> &point_work_values,
+                        std::vector<Point> &points);
+
+FloatingPointType CellDischargeCurve::get_initial_work() const {
+  return point_work_values.front();
+}
+
 FloatingPointType
-CellDischargeCurve::get_initial_electric_potential_energy() const {
-  return point_electric_potential_energy_values.front();
-}
-
-template <class T> T CellDischargeCurve::read(std::istream &is) {
-  T is_x;
-  is.read(reinterpret_cast<char *>(&is_x), sizeof(is_x));
-  return is_x;
-}
-
-FloatingPointType CellDischargeCurve::point_get_electric_potential_energy(
-    const Point *const point) {
+CellDischargeCurve::point_get_work(const Point *const point) {
   return *(point->z_pointer);
 }
 
