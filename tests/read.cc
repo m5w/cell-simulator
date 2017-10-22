@@ -44,6 +44,7 @@ int main() {
     time = change_in_time * number_of_changes_in_time;
   }
 
+  std::cerr << '\n';
   const FloatingPointType cell_initial_electric_potential_energy =
       cell.get_initial_electric_potential_energy();
   set_precision(std::cout);
