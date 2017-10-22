@@ -17,6 +17,7 @@
 class CellDischargeCurve {
 public:
   CellDischargeCurve(std::istream &is);
+  inline FloatingPointType get_initial_electric_potential_energy() const;
   FloatingPointType lerp_voltage_source_voltage(
       const FloatingPointType charge_discharged_from_cell) const;
   FloatingPointType lerp_electric_potential_energy(
@@ -33,6 +34,11 @@ private:
   std::vector<Point> points;
   mutable LerpLinearBuf buf;
 };
+
+FloatingPointType
+CellDischargeCurve::get_initial_electric_potential_energy() const {
+  return point_electric_potential_energy_values.front();
+}
 
 template <class T> T CellDischargeCurve::read(std::istream &is) {
   T is_x;

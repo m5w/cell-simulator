@@ -1,12 +1,15 @@
 #include <cstddef>
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 
 #include "cell.h"
 
-FloatingPointType
+static inline void set_precision(std::ostream &os);
+
+static FloatingPointType
 get_module_voltage(const FloatingPointType load_current,
                    const FloatingPointType cell_voltage_source_voltage,
                    const FloatingPointType cell_mean_internal_conductance);
@@ -25,20 +28,33 @@ int main() {
   FloatingPointType time = 0.0;
   constexpr FloatingPointType change_in_time = 1.0;
   std::size_t number_of_changes_in_time = 0;
-  std::cout.precision(std::numeric_limits<FloatingPointType>::max_digits10);
+  FloatingPointType load_work = 0.0;
+  set_precision(std::cerr);
 
   while (module_voltage >= 2.5) {
-    std::cout << time << ", " << module_voltage << '\n';
+    std::cerr << std::setw(14) << time << std::setw(0) << "  "
+              << module_voltage << std::setw(0) << '\n';
     cell_voltage_source_voltage =
         cell.get_next_voltage_source_voltage(change_in_time, module_voltage);
     module_voltage =
         get_module_voltage(load_current, cell_voltage_source_voltage,
                            cell_mean_internal_conductance);
+    load_work += load_current * module_voltage;
     ++number_of_changes_in_time;
     time = change_in_time * number_of_changes_in_time;
   }
 
-  std::cout << cell.get_electric_potential_energy() << '\n';
+  const FloatingPointType cell_initial_electric_potential_energy =
+      cell.get_initial_electric_potential_energy();
+  set_precision(std::cout);
+  std::cout << load_work / cell_initial_electric_potential_energy << '\n';
+  std::cout << cell_initial_electric_potential_energy -
+                   cell.get_electric_potential_energy() - load_work
+            << '\n';
+}
+
+void set_precision(std::ostream &os) {
+  os.precision(std::numeric_limits<FloatingPointType>::max_digits10);
 }
 
 FloatingPointType
