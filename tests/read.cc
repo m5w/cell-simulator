@@ -12,7 +12,6 @@
 #include "point.h"
 
 static inline void set_precision(std::ostream &os);
-
 static FloatingPointType
 get_module_voltage(const FloatingPointType load_current,
                    const FloatingPointType cell_voltage_source_voltage,
