@@ -1,6 +1,6 @@
-function cells_file_insert_cell(name, cell_identifier, the_cell, ~)
+function cells_file_insert_cell(name, cell_identifier, the_cell, varargin)
 if nargin >= 4
-    exclusive_mode = varargin{3};
+    exclusive_mode = varargin{1};
 else
     exclusive_mode = true;
 end
