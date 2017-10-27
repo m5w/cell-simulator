@@ -13,7 +13,9 @@ add_library (lerp
         )
 add_library (cell
         cell.cc
+        cell_buf.cc
         cell_discharge_curve.cc
+        cell_discharge_curve_buf.cc
         )
 target_link_libraries (cell
         ${Boost_LIBRARIES}
