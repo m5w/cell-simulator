@@ -19,6 +19,11 @@ FloatingPointType CellDischargeCurveBuf::lerp_open_circuit_voltage(
 
 FloatingPointType CellDischargeCurveBuf::lerp_work(
     const FloatingPointType charge_supplied) const {
-  return lerp_z_linear(&(CellDischargeCurveBuf::buf), charge_supplied,
-                       point_get_work);
+  const FloatingPointType work = lerp_z_linear(
+      &(CellDischargeCurveBuf::buf), charge_supplied, point_get_work);
+
+  if (BOOST_UNLIKELY(lerp_error != NONE))
+    throw std::exception();
+
+  return work;
 }
