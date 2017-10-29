@@ -2,22 +2,19 @@
 #define CELL_POINTS_H
 
 #include <cstddef>
-#include <cstdint>
 
-#include <exception>
-#include <istream>
+#include <iosfwd>
 #include <vector>
-
-#include <boost/config.hpp>
 
 #include "floating_point_type.h"
 #include "point.h"
 
-#include "read.h"
+class CellPointsBuf;
 
 class CellPoints {
 public:
   CellPoints(std::istream &is);
+  CellPointsBuf create_cell_points_buf(FloatingPointType &initial_work) const;
   inline FloatingPointType get_initial_work() const;
   inline const Point *get_points() const;
   inline std::size_t get_number_of_points() const;

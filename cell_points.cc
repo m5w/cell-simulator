@@ -1,5 +1,12 @@
 #include "cell_points.h"
 
+#include <exception>
+
+#include <boost/config.hpp>
+
+#include "cell_points_buf.h"
+#include "read.h"
+
 #define READ                                                                  \
   const FloatingPointType the_charge_supplied = read<double>(is);             \
   const FloatingPointType the_open_circuit_voltage = read<double>(is);        \
@@ -27,6 +34,11 @@ CellPoints::CellPoints(std::istream &is) {
 
   for (std::size_t n = 1; n < number_of_points; ++n)
     points.push_back(read_point(is));
+}
+
+CellPointsBuf
+CellPoints::create_cell_points_buf(FloatingPointType &initial_work) const {
+  return CellPointsBuf(this, initial_work);
 }
 
 Point CellPoints::read_point(std::istream &is) {

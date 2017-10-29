@@ -12,6 +12,8 @@ add_library (lerp
         point.cc
         )
 add_library (cell
+        cell.cc
+        cell_buf.cc
         cell_points.cc
         cell_points_buf.cc
         )

@@ -1,10 +1,18 @@
 #include "cell_points_buf.h"
 
-CellPointsBuf::CellPointsBuf(const CellPoints *const the_cell_points_pointer)
+#include <exception>
+
+#include <boost/config.hpp>
+
+#include "cell_points.h"
+
+CellPointsBuf::CellPointsBuf(const CellPoints *const the_cell_points_pointer,
+                             FloatingPointType &initial_work)
     : the_cell_points_pointer(the_cell_points_pointer),
-      initial_work(the_cell_points_pointer->get_initial_work()),
       buf(lerp_linear_buf(the_cell_points_pointer->get_points(),
-                          the_cell_points_pointer->get_number_of_points())) {}
+                          the_cell_points_pointer->get_number_of_points())) {
+  initial_work = the_cell_points_pointer->get_initial_work();
+}
 
 FloatingPointType CellPointsBuf::lerp_open_circuit_voltage(
     const FloatingPointType charge_supplied) {
