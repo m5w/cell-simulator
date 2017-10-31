@@ -16,6 +16,7 @@ add_library (cell
         cell_buf.cc
         cell_points.cc
         cell_points_buf.cc
+        cells.cc
         )
 target_link_libraries (cell
         ${Boost_LIBRARIES}
