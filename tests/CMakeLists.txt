@@ -5,5 +5,5 @@ target_link_libraries (test-lerp-cell-voltage
         )
 add_executable (read read.cc)
 target_link_libraries (read
-        cell
+        module
         )

@@ -11,14 +11,15 @@ add_library (lerp
         lerp.cc
         point.cc
         )
-add_library (cell
+add_library (module
         cell.cc
         cell_buf.cc
         cell_points.cc
         cell_points_buf.cc
         cells.cc
+        module.cc
         )
-target_link_libraries (cell
+target_link_libraries (module
         ${Boost_LIBRARIES}
         lerp
         )

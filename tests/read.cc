@@ -46,7 +46,7 @@ int main() {
     module_voltage =
         get_module_voltage(load_current, cell_open_circuit_voltage,
                            cell_mean_internal_conductance);
-    load_work += load_current * module_voltage;
+    load_work += load_current * module_voltage * change_in_time;
     ++number_of_changes_in_time;
     time = change_in_time * number_of_changes_in_time;
   }
