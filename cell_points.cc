@@ -13,7 +13,7 @@
   const FloatingPointType the_work = read<double>(is);                        \
   points_work.push_back(the_work)
 
-#define READ_POINT                                                            \
+#define READ_CREATE_POINT                                                     \
   {                                                                           \
     .x = the_charge_supplied, .y = the_open_circuit_voltage,                  \
     .z_pointer = &points_work.back()                                          \
@@ -30,7 +30,7 @@ CellPoints::CellPoints(std::istream &is) {
 
   READ;
   initial_work = the_work;
-  points.push_back(READ_POINT);
+  points.push_back(READ_CREATE_POINT);
 
   for (std::size_t n = 1; n < number_of_points; ++n)
     points.push_back(read_point(is));
@@ -43,8 +43,8 @@ CellPoints::create_cell_points_buf(FloatingPointType &initial_work) const {
 
 Point CellPoints::read_point(std::istream &is) {
   READ;
-  return READ_POINT;
+  return READ_CREATE_POINT;
 }
 
 #undef READ
-#undef READ_POINT
+#undef READ_CREATE_POINT

@@ -62,13 +62,12 @@ Cells::CellBuf_array<N> Cells::create_cell_buf_array(
     std::array<FloatingPointType, number_of_cells> &cells_open_circuit_voltage)
     const {
   constexpr std::size_t n = number_of_cells - N;
-  return {.the_cell_buf =
-              create_cell_buf(cells_identifer[n], cells_initial_work[n],
-                              cells_mean_internal_conductance[n],
-                              cells_open_circuit_voltage[n]),
-          .the_cell_buf_array = create_cell_buf_array<N - 1>(
-              cells_identifer, cells_initial_work,
-              cells_mean_internal_conductance, cells_open_circuit_voltage)};
+  return {create_cell_buf(cells_identifer[n], cells_initial_work[n],
+                          cells_mean_internal_conductance[n],
+                          cells_open_circuit_voltage[n]),
+          create_cell_buf_array<N - 1>(cells_identifer, cells_initial_work,
+                                       cells_mean_internal_conductance,
+                                       cells_open_circuit_voltage)};
 }
 
 template <>
@@ -80,10 +79,9 @@ Cells::CellBuf_array<1> Cells::create_cell_buf_array<1>(
     std::array<FloatingPointType, number_of_cells> &cells_open_circuit_voltage)
     const {
   constexpr std::size_t n = number_of_cells - 1;
-  return {.the_cell_buf =
-              create_cell_buf(cells_identifer[n], cells_initial_work[n],
-                              cells_mean_internal_conductance[n],
-                              cells_open_circuit_voltage[n])};
+  return {create_cell_buf(cells_identifer[n], cells_initial_work[n],
+                          cells_mean_internal_conductance[n],
+                          cells_open_circuit_voltage[n])};
 }
 
 CellBuf Cells::create_cell_buf(const std::size_t cell_identifier,
