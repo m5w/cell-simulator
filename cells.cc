@@ -2,10 +2,6 @@
 
 #include <cstdint>
 
-#include <algorithm>
-#include <iterator>
-#include <vector>
-
 #include "read.h"
 
 #include "cell_buf.h"
