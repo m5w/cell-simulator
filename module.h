@@ -5,9 +5,9 @@
 
 #include <array>
 
-#include "floating_point_type.h"
+#include "cell_buf.h"
 
-class CellBuf;
+#include "floating_point_type.h"
 
 constexpr std::size_t number_of_cells = 12;
 
