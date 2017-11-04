@@ -1,9 +1,9 @@
-add_executable (test-lerp-cell-voltage test_lerp_cell_voltage.cc)
-target_link_libraries (test-lerp-cell-voltage
+add_executable (test-liblerp test_liblerp.cc)
+target_link_libraries (test-liblerp
         ${Boost_LIBRARIES}
         lerp
         )
-add_executable (read read.cc)
-target_link_libraries (read
+add_executable (test-libmodule test_libmodule.cc)
+target_link_libraries (test-libmodule
         module
         )
