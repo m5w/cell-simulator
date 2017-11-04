@@ -27,7 +27,8 @@ public:
   Module
   create_module(const std::array<std::size_t, number_of_cells> cells_identifer,
                 const FloatingPointType load_current,
-                FloatingPointType &voltage);
+                FloatingPointType &initial_work,
+                FloatingPointType &voltage) const;
 
 private:
   template <std::size_t N>
@@ -37,7 +38,7 @@ private:
       std::array<FloatingPointType, number_of_cells>
           &cells_mean_internal_conductance,
       std::array<FloatingPointType, number_of_cells>
-          &cells_open_circuit_voltage);
+          &cells_open_circuit_voltage) const;
   CellBuf create_cell_buf(const std::size_t cell_identifier,
                           FloatingPointType &initial_work,
                           FloatingPointType &mean_internal_conductance,
@@ -75,25 +76,13 @@ public:
   get_cells_buf(const CellBuf *const cells_buf);
 };
 
-template class Cells::CellBuf_array<number_of_cells>::GetCellsBuf<
-    number_of_cells>;
-
 template <>
 Cells::CellBuf_array<1> Cells::create_cell_buf_array<1>(
     const std::array<std::size_t, number_of_cells> &cells_identifer,
     std::array<FloatingPointType, number_of_cells> &cells_initial_work,
     std::array<FloatingPointType, number_of_cells>
         &cells_mean_internal_conductance,
-    std::array<FloatingPointType, number_of_cells>
-        &cells_open_circuit_voltage);
-
-template Cells::CellBuf_array<number_of_cells>
-Cells::create_cell_buf_array<number_of_cells>(
-    const std::array<std::size_t, number_of_cells> &cells_identifer,
-    std::array<FloatingPointType, number_of_cells> &cells_initial_work,
-    std::array<FloatingPointType, number_of_cells>
-        &cells_mean_internal_conductance,
-    std::array<FloatingPointType, number_of_cells>
-        &cells_open_circuit_voltage);
+    std::array<FloatingPointType, number_of_cells> &cells_open_circuit_voltage)
+    const;
 
 #endif
