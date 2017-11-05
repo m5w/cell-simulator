@@ -6,6 +6,7 @@
 #include <array>
 #include <iosfwd>
 #include <map>
+#include <string>
 
 #include "floating_point_type.h"
 
@@ -23,7 +24,9 @@ private:
   };
 
 public:
-  Cells(std::istream &is);
+  Cells(const char *s);
+  Cells(const std::string &s);
+  Cells(std::ifstream &&rhs);
   Module
   create_module(const std::array<std::size_t, number_of_cells> cells_identifer,
                 const FloatingPointType load_current,
@@ -31,6 +34,7 @@ public:
                 FloatingPointType &voltage) const;
 
 private:
+  Cells(std::istream &&is);
   template <std::size_t N>
   CellBuf_array<N> create_cell_buf_array(
       const std::array<std::size_t, number_of_cells> &cells_identifer,

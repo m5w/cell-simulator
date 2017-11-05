@@ -3,9 +3,7 @@
 
 #include <cstddef>
 
-#include <fstream>
 #include <iomanip>
-#include <ios>
 #include <iostream>
 #include <limits>
 
@@ -17,10 +15,7 @@
 static inline void set_precision(std::ostream &os);
 
 BOOST_AUTO_TEST_CASE(test_Module) {
-  std::ifstream is("../cells.bin");
-  is.exceptions(std::ios_base::badbit | std::ios_base::failbit |
-                std::ios_base::eofbit);
-  const Cells the_cells(is);
+  const Cells the_cells("../cells.bin");
   FloatingPointType module_initial_work;
   FloatingPointType module_voltage;
   Module the_module =

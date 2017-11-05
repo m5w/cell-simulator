@@ -2,6 +2,9 @@
 
 #include <cstdint>
 
+#include <fstream>
+#include <ios>
+
 #include "read.h"
 
 #include "cell_buf.h"
@@ -27,14 +30,11 @@ Cells::CellBuf_array<number_of_cells>::GetCellsBuf<1, n...>::get_cells_buf(
   return {cells_buf[n]..., cells_buf[number_of_cells - 1]};
 }
 
-Cells::Cells(std::istream &is) {
-  std::size_t number_of_cells = read<std::uint64_t>(is);
+Cells::Cells(const char *s) : Cells(std::ifstream(s)) {}
 
-  for (std::size_t n = 0; n < number_of_cells; ++n) {
-    const std::size_t cell_identifier = read<std::uint64_t>(is);
-    cells.emplace_hint(cells.cend(), cell_identifier, Cell(is));
-  }
-}
+Cells::Cells(const std::string &s) : Cells(std::ifstream(s)) {}
+
+Cells::Cells(std::ifstream &&rhs) : Cells(static_cast<std::istream &&>(rhs)) {}
 
 Module Cells::create_module(
     const std::array<std::size_t, number_of_cells> cells_identifer,
@@ -51,6 +51,17 @@ Module Cells::create_module(
   return Module(cells_buf, cells_initial_work, cells_mean_internal_conductance,
                 cells_open_circuit_voltage, load_current, initial_work,
                 voltage);
+}
+
+Cells::Cells(std::istream &&rhs) {
+  rhs.exceptions(std::ios_base::badbit | std::ios_base::failbit |
+                 std::ios_base::eofbit);
+  std::size_t number_of_cells = read<std::uint64_t>(rhs);
+
+  for (std::size_t n = 0; n < number_of_cells; ++n) {
+    const std::size_t cell_identifier = read<std::uint64_t>(rhs);
+    cells.emplace_hint(cells.cend(), cell_identifier, Cell(rhs));
+  }
 }
 
 template <std::size_t N>
